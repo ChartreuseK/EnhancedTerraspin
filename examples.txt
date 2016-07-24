@@ -1,0 +1,51 @@
+Square Spiral:
+-------------------------------------------------------------
+D 		- Pen Down
+20 		- Initial line length onto stack
+,
+10		- Loop counter onto stack
+( 		- Pushes IP of this character onto stack
+	2E	- Swap SP-2 (line length) with SP (Loop Base Pointer)
+	P	- Duplicate line length
+	M 	- Move line length (eats one copy from stack)
+	90T - Turn 90 degrees (ccw)
+    10A - Add 10 to line length
+    2E	- Swap SP-2 (Loop base pointer) with SP (line length)
+)		- Decrement loop counter, if >0 then jump to base pointer
+
+-------------------------------------------------------------
+D20,10(2E P M 90T 10A 2E)
+
+
+Conditional Test:
+All Jumps used are IP relative, need to be adjusted if other things are done
+inside the conditional. White space is important when using jumps
+
+This code tests if the value pushed on the second line is <= 1
+If so it will rotate 90 degrees before drawing a 100 length line
+If not it will just draw the line.
+--------------------------------------------------------------------------------
+D
+5		- Test Value - Will be destroyed by conditional
+(		- Push current IP onto stack
+1		- Number of bytes ahead to skip
+1		-  11
+A		- Add to IP
+)		- Pop Target and Test value, if Test Value-1 < 1 then fall through. 
+	      Else push back test val-1 and Target, and jump to Target
+9		- Arrive here if Test Value <= 1 with clean stack
+0
+T		- Turn 90 degrees to indicate success
+(		- Push IP
+5		- Jump 5 ahead
+A		- Add to IP
+R		- Jump to pushed IP+9
+K		- (Arrive here if Test Value > 1 with BP and LR on stack) Pop BP off stack
+K		- Pop LR off stack
+1		- (Arrive here after turning 90 degrees)
+0
+0		- 100
+M		- Move
+--------------------------------------------------------------------------------
+
+D5P(11A)90T(5ARKK100M
