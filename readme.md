@@ -34,10 +34,12 @@ D	|   Place pen down (will draw if moving)
 ,	| 	Used to seperate two adjacent numbers to push on stack
 A   |   Pop top two values on stack, push sum
 P	|	Duplicate top value on stack
-S	| 	Pop top two values on stack, push difference
+S	| 	Pop top two values on stack, push difference (SK(SP-1) - SK(SP))
 F	|	Swap top two values on stack
 E	|	Pop V from stack, Exchange top of stack with value at position SP-V in stack
 R	|	Pop V off stack, set IP=V ie. Return, Push IP using (
 K	| 	Pop top value off stack
-
+C   |   Call subroutine, pop address off stack, push current IP, jump to address
+X   |   Pop top two values on stack, push SK(SP-1) * SK(SP)
+Q   |   Pop top two values on stack, push SK(SP-1) / SK(SP)
 

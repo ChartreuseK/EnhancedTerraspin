@@ -51,7 +51,7 @@ M		- Move
 D5P(11A)90T(5ARKK100M
 
 
-Procedure test: (8 depth stack minimum)
+Procedure test (without C): 8 depth stack minimum
 Careful to note that newline characters count when aligning.
 On the TRS-80 Model 100 there are two characters \r and \n
 --------------------------------------------------------------------------------
@@ -84,3 +84,36 @@ draw sqaure @40,,,
 start of prog @80,
 5(D 50M 50 (6A040R
 K 180T U 50M -72T)
+
+Procedure Test (with C): 
+Careful to note that newline characters count when aligning.
+On the TRS-80 Model 100 there are two characters \r and \n
+--------------------------------------------------------------------------------
+0080R	- Jump to start of program
+4(		- Start of procedure, align to @40.  Loop 4 times
+ 3E		- Swap SP-3(Argument) with top of stack(BP)
+ PM		- Duplicate argument, and move that distance
+ 90T	- Turn 90 degrees CCW
+ 3E		- Swap SP-3(BP) with top of stack(Argument)
+)		- Loop 
+R		- Return (pop return pointer off stack)
+
+4(		- Start of program, align to @80. Loop 4 times
+ D		- Pen down
+ 100M	- Move 100
+ 50		- Push argument
+ 040C	- Call to @40
+ K		- Remove argument from stack
+ 180T	- Turn 180 degrees
+ U		- Pen up
+ 100M	- Move 100 (Return to start)
+ 252T	- Turn 72 degrees CCW (Since we're 180 off we need to turn 180+72)
+ )		- Loop
+--------------------------------------------------------------------------------
+
+0080R,,,,,,,,,,,,,
+draw sqaure @40,,,
+4(3E PM 90T 3E)R,,
+start of prog @80,
+5(D 50M 50 040C K,
+180T U 50M -72T) ,
