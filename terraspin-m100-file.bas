@@ -3,9 +3,18 @@
 120 REM written by FozzTexx
 126	REM modified for TRS-80 Model 100 by ChartreuseK
 127 REM enhanced functions "APSFERK" by ChartreuseK
+128 REM Reading command from .DO file by ChartreuseK
+129 REM Filo I/O should be portable to most basics with some form of Disk I/O
+130 REM All occurances of C$ = INPUT$(1,1) can be replaced by a function
+131 REM that reads one character from a file. 
+132 REM Occurances of OPEN FN$ FOR INPUT AS 1 can be replaced by something to 
+133 REM open a file as input starting at the first character
+134 REM Occurances of CLOSE 1 should close the open file.
+135 REM If your basic has a way of rewinding a file. Close+Open can be replaced by
+136 REM a rewind. 
 
-130 REM Model100 BASIC has bitwise operators so much of the line clipping
-140 REM logic is simplified compared to the Apple II version.
+140 REM Model100 BASIC has bitwise operators so much of the line clipping
+141 REM logic is simplified compared to the Apple II version.
 
 200 REM === Initialize variables
 201 REM === Change the 15 / 4 to match your screens aspect ratio (M-100 is 15:4)
@@ -17,18 +26,23 @@
 250 REM === Set turtle start at center of screen pointing up, pen up
 260 TX = 500:TY = SH / YS / 2:TA = 90:TP = 0
 
-300 REM === Get command to execute
-310 CM$="D20,10(2E P M 90T 10A 2E)"
-320 REM === Set stack size (Defaults to 10 without this line)
-330 DIM SK(50)
+270 REM === Set stack size (Default to 10)
+280 SD = 10:INPUT "Stack Depth";SD
+285 DIM SK(SD)
+
+290 REM === Load the file to read from
+300 INPUT "Filename";FN$
+310 OPEN FN$ FOR INPUT AS 1
 
 490 CLS
 
 500 REM === Command interpreter
 510 IP = 1:SP = 0
-520 C$ = MID$(CM$, IP, 1)
+515 REM == Read next character from file
+520 C$ = INPUT$(1,1)
 530 IF C$ = " " THEN IP = IP + 1:GOTO 520
-540 IF C$ >= "-" AND C$ <= "9" THEN V = VAL(MID$(CM$, IP)):GOSUB 1010:GOSUB 1210
+535 IF C$ = "," THEN IP = IP + 1:GOTO 520
+540 IF C$ >= "-" AND C$ <= "9" THEN GOSUB 1210:GOTO 530
 550 IF C$ = "(" THEN V = IP:GOSUB 1010
 560 IF C$ = ")" THEN GOSUB 2010
 570 IF C$ = "M" THEN GOSUB 2510
@@ -45,7 +59,7 @@
 680	IF C$ = "K" THEN GOSUB 1110
 
 700 IP = IP + 1
-710 IF IP > LEN(CM$) THEN 710
+710 IF EOF(1) THEN 710
 720 GOTO 520
 
 1000 REM === Push onto stack
@@ -56,15 +70,14 @@
 1110 V = SK(SP):SP = SP - 1
 1120 RETURN
 
-1200 REM === Skip over number
-1210 IP = IP + 1
-1220 IF IP > LEN(CM$) THEN 1250
-1230 C2$ = MID$(CM$, IP, 1)
-1240 IF C2$ >= "-" AND C2$ <= "9" THEN GOTO 1210
-1250 IP = IP - 1
+1200 REM === Read in number
+1210 N$ = C$
+1220 IF EOF(1) THEN 1250
+1230 C$ = INPUT$(1,1):IP = IP+1
+1240 IF C$ > "-" AND C$ <= "9" THEN N$ = N$ + C$:GOTO 1220
+1250 V = VAL(N$):GOSUB 1010
 1260 RETURN
 
-1300 REM === Read in character into C$
 
 1500 REM === Plot a line
 1510 LINE(X1,Y1)-(X2,Y2),PSET
@@ -77,8 +90,16 @@
 2040 IF LR < 1 THEN RETURN
 2050 V = LR:GOSUB 1010
 2060 V = BP:GOSUB 1010
-2070 IP = BP
-2080 RETURN
+2065 REM = Reposition in file
+2070 IF BP < IP THEN GOTO 2110
+2080 FOR I=0 TO BP-IP:C$=INPUT$(1,1):NEXT I
+2090 GOTO 2150
+2100 REM = Rewind file
+2110 CLOSE 1
+2120 OPEN FN$ FOR INPUT AS 1
+2130 FOR I=0 TO BP:C$=INPUT$(1,1):NEXT I
+2150 IP = BP
+2160 RETURN
 
 2500 REM === Move
 2510 GOSUB 1110
@@ -162,5 +183,17 @@
 
 8000 REM === Pop V off stack, set IP=V ie. Return, Push IP using (
 8005 REM ===  Also can be used for arbitrary jumps  ie   15R   jumps to location 15
-8010 GOSUB 1110:IP=V
-8020 RETURN
+8010 GOSUB 1110
+8015 REM = Reposition in file
+8020 IF V < IP THEN GOTO 8060
+8030 FOR I=0 TO V-IP:C$=INPUT$(1,1):NEXT I
+8040 GOTO 8090
+8050 REM = Rewind file
+8060 CLOSE 1
+8070 OPEN FN$ FOR INPUT AS 1
+8080 FOR I=0 TO V:C$=INPUT$(1,1):NEXT I
+8090 IP = V
+8100 RETURN
+
+
+

@@ -5,6 +5,16 @@ Written by FozzTexx
 Modified for TRS-80 Model 100 by ChartreuseK
 Enhanced functions "APSFERK" by ChartreuseK
 
+### Disk I/O
+The file I/O in terraspin-m100-file.bas is written for the TRS-80 Model 100.
+File I/O should be portable to most BASICs with some form of Disk I/O with a few changes to the syntax.
+"C$ = INPUT$(1,1)" can be replaced by a function that reads one character from a file. 
+"OPEN FN$ FOR INPUT AS 1" should be replaced by something that opens a file for input
+"CLOSE 1" should be replaced by something that closes the open file.
+If your BASIC has a way of rewinding a file then CLOSE+OPEN can be replaced by a rewind. 
+If your BASIC supports random access file I/O. The parts in the ')' and 'R' commands that seek through the file can be replaced by the appropriate command from your BASIC.
+
+
 
    |Original commands
 :---:|---
@@ -29,4 +39,5 @@ F	|	Swap top two values on stack
 E	|	Pop V from stack, Exchange top of stack with value at position SP-V in stack
 R	|	Pop V off stack, set IP=V ie. Return, Push IP using (
 K	| 	Pop top value off stack
+
 
