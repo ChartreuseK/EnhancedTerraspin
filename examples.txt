@@ -117,3 +117,140 @@ draw sqaure @40,,,
 start of prog @80,
 5(D 50M 50 040C K,
 180T U 50M -72T) ,
+
+
+
+
+
+
+
+Draw a positive integer:
+
+draw int ----
+         - First: Check if zero or less
+ F		 - Swap Return address and argument
+ P		 - Duplicate value
+ (012A	 - Set branch target if > 0  (target = 164
+ )		 - Test if > 0, branch if so, fall through (clear stack) if not
+ F		 - Place back return address
+ 1250R   - Jump directly to 0 draw routine (tail call)
+ KK      - (branch target=164) Remove brach address and modified argument from stack 
+ P		 - Duplicate argument
+ 2EF	 - Swap with return address, and shift return address down one. (Stack is Arg Ret Arg  now)
+ -1F	 - Push end marker value down onto the stack (Arg Ret -1 Arg)
+ 0,0	 - Push two useless values to be removed (to allow loop as cond later
+ KK		 - Remove loop/useless values on stack (loop target=190)
+ P		 - Duplicate current value 
+ P       - Another copy
+ 10Q10X  - Strip off lowest digit
+ S		 - Subtract number missing lower digit from number. Equiv of MOD 10
+ F		 - Shift down stack, bringing current value back to top
+ 10Q	 - Divide by 10
+ P1A	 - Duplicate current value (add 1 to test against 0)
+ (-20A   - Set branch target to loop back if > 0     (Target = 190)
+ )		 - Test if > 0, loop if so, fall through (clear stack) if not
+ K		 - Remove current value, no longer needed
+ P		 - Duplicate digit (loop target=217)
+ 2A		 - Add two so we can test for our marker -1
+ (07A	 - Set branch target if digit is not the marker (target = 227)
+ )		 - Test if >= 0, branch if so, fall through (clear stack) if not
+ K		 - We hit our end marker, remove it from the stack
+ R		 - Now we can return (stack should be Arg Ret, as it was when we entered)
+ KK		 - (branch target=227) remove branch address and modified digit from stack
+ 0040C	 - Print the digit (destroys it from stack)
+ (-19AR  - Loop back (target=217)
+                 , 
+                 
+FP(012A)F1250RKKP2
+EF-1F0,0         ,
+KKPP10Q10XSF10QP1A
+(-20A)KP2A(07A)KRK
+K0040C(-19AR     ,
+
+
+
+draw 0-9 ----
+F		 - Swap return address with argument
+5X		 - Multiply by 5 (width of an entry in jump table)
+1200A	 - 1200 (address of jump table), add to index
+R		 - Jump into jump table
+- Jump table 0-9
+1020R 040R 120R 240R 360R 460R 580R 680R 760R 900R
+
+
+Entire program, including number drawing routines
+   Replace the 127 on the last line with whatever integer you want to write
+--------------------------------------------------------
+1390R number test,
+draw 0-9 @40     ,
+F 5X   80A R     ,
+draw jmp tbl @80 ,
+1250R 270R 350R 470R 590R 690R 810R 910R 990R1130R
+draw +int  @150,
+FP(012A)F1250RKKP2
+EF-1F0,0         ,
+KKPP10Q10XSF10QP1A
+(-20A)KP2A(07A)KRK
+K0040C(-19AR     ,
+draw one @270    ,			(Assuming 40x60 cell, positioned top left, pointing right)
+20M -90T 10M D 40M			(Ending at top left corner of cell to the right)
+U 180T 50M -90T 20
+M R              ,
+draw two @350	 ,
+5M -90T 10M 90T D,
+30M -90T 20M -90T,
+30M 90T 20M 90T  ,
+30M 90T U 50M -90T
+5M R             ,
+draw three @470  ,
+5M -90T 10M 90T D,
+30M -90T 20M -90T,
+30M 180T 30M -90T,
+20M -90T 30M 180T,
+U35M 90T 50M -90TR
+draw four @590   ,
+5M -90T 10M D    ,
+20M 90T 30M -90T ,
+20M 180T 40M U 10M
+-90T 5M R        ,
+draw five @690   ,
+5M -90T 10M 90T D,
+30M 180T 30M 90T ,
+20M 90T 30M -90T ,
+20M -90T 30M -90T,
+U 50M -90T 35M R ,
+draw six @810    ,
+5M -90T 10M D    ,
+40M 90T 30M 90T  ,
+20M 90T 30M -90T U
+30M -90T 35M R   ,
+draw seven @910  ,
+5M -90T 10M 90T D,
+30M -90T 40M 180T,
+U 50M -90T 5M R  ,
+draw eight  @990 ,
+5M -90T 10M D    ,
+40M 90T 30M 90T  ,
+20M 90T 30M 180T ,
+30M 90T 20M 90T  ,
+30M U -90T 10M   ,
+-90T 35M R       ,
+draw nine @1130  ,
+5M -90T 10M D    ,
+20M 90T 30M -90T ,
+20M 180T 40M 90T ,
+30M U -90T 10M   ,
+-90T 35M R       ,
+draw zero @1250  ,
+5M -90T 10M D    ,
+40M 90T 30M 90T  ,
+40M 90T 30M U -90T
+10M -90T 35M R   ,
+space @1350      ,
+40M R            ,
+start @1390      ,
+-90T             ,
+1024 150C K 40M  ,
+37   150C K      ,
+-----------------------------------------------------------------
+

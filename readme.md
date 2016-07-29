@@ -41,5 +41,5 @@ R	|	Pop V off stack, set IP=V ie. Return, Push IP using (
 K	| 	Pop top value off stack
 C   |   Call subroutine, pop address off stack, push current IP, jump to address
 X   |   Pop top two values on stack, push SK(SP-1) * SK(SP)
-Q   |   Pop top two values on stack, push SK(SP-1) / SK(SP)
+Q   |   Pop top two values on stack, push INT(SK(SP-1) / SK(SP))
 
